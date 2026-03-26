@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexora — L'IA qui travaille pour vous</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #080810;
+  --black2: #0d0d18;
+  --surface: #111120;
+  --surface2: #16162a;
+  --border: rgba(255,255,255,0.07);
+  --border-bright: rgba(255,255,255,0.15);
+  --cyan: #00e5ff;
+  --cyan-dim: rgba(0,229,255,0.12);
+  --violet: #9d6fff;
+  --violet-dim: rgba(157,111,255,0.12);
+  --white: #f0f0f8;
+  --muted: rgba(240,240,248,0.45);
+  --muted2: rgba(240,240,248,0.25);
+  --glow-cyan: 0 0 40px rgba(0,229,255,0.25);
+  --glow-violet: 0 0 40px rgba(157,111,255,0.25);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--black);
+  color: var(--white);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── CURSOR ── */
+.cursor {
+  width: 8px; height: 8px;
+  background: var(--cyan);
+  border-radius: 50%;
+  position: fixed; z-index: 9999;
+  pointer-events: none;
+  transition: transform 0.15s ease;
+  mix-blend-mode: screen;
+}
+.cursor-ring {
+  width: 36px; height: 36px;
+  border: 1px solid rgba(0,229,255,0.4);
+  border-radius: 50%;
+  position: fixed; z-index: 9998;
+  pointer-events: none;
+  transition: all 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 24px 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+nav.scrolled {
+  background: rgba(8,8,16,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom-color: var(--border);
+}
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--white);
+  text-decoration: none;
+}
+.logo span { color: var(--cyan); }
+.nav-links { display: flex; gap: 40px; list-style: none; }
+.nav-links a {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-cta {
+  padding: 10px 28px;
+  border: 1px solid var(--cyan);
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.nav-cta::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--cyan);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+.nav-cta:hover { color: var(--black); }
+.nav-cta:hover::before { transform: translateX(0); }
+.nav-cta span { position: relative; z-index: 1; }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 120px 60px 80px;
+}
+
+.hero-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 50%, rgba(0,229,255,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 85% 30%, rgba(157,111,255,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 50% 80%, rgba(0,229,255,0.04) 0%, transparent 60%);
+}
+
+/* Grid lines */
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 0%, transparent 100%);
+}
+
+.hero-content {
+  max-width: 900px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 11px; font-weight: 600; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--cyan);
+  margin-bottom: 40px;
+  opacity: 0; animation: fadeUp 0.8s ease 0.2s both;
+}
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content: ''; display: block;
+  width: 40px; height: 1px; background: var(--cyan); opacity: 0.5;
+}
+
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(56px, 9vw, 110px);
+  font-weight: 300;
+  line-height: 0.95;
+  letter-spacing: -1px;
+  color: var(--white);
+  margin-bottom: 32px;
+  opacity: 0; animation: fadeUp 0.9s ease 0.35s both;
+}
+.hero-title em {
+  font-style: italic;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,0.4);
+}
+.hero-title .accent { color: var(--cyan); -webkit-text-stroke: 0; }
+
+.hero-sub {
+  font-size: 16px; font-weight: 400;
+  color: var(--muted);
+  line-height: 1.8;
+  max-width: 560px;
+  margin: 0 auto 56px;
+  opacity: 0; animation: fadeUp 0.9s ease 0.5s both;
+}
+
+.hero-btns {
+  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+  opacity: 0; animation: fadeUp 0.9s ease 0.65s both;
+}
+
+.btn-primary {
+  padding: 18px 48px;
+  background: var(--cyan);
+  color: var(--black);
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  border: none; border-radius: 2px;
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 10px;
+  transition: all 0.3s ease;
+  position: relative; overflow: hidden;
+}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: var(--glow-cyan); }
+
+.btn-ghost {
+  padding: 18px 48px;
+  background: transparent;
+  color: var(--white);
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  border: 1px solid var(--border-bright);
+  border-radius: 2px;
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 10px;
+  transition: all 0.3s ease;
+}
+.btn-ghost:hover { border-color: var(--violet); color: var(--violet); transform: translateY(-3px); }
+
+/* Scroll indicator */
+.scroll-hint {
+  position: absolute; bottom: 40px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  opacity: 0; animation: fadeUp 1s ease 1s both;
+}
+.scroll-line {
+  width: 1px; height: 60px;
+  background: linear-gradient(to bottom, var(--cyan), transparent);
+  animation: scrollPulse 2s ease infinite;
+}
+.scroll-hint span { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted2); }
+
+/* ── MARQUEE ── */
+.marquee-section {
+  padding: 32px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--surface);
+}
+.marquee-track {
+  display: flex; gap: 60px;
+  animation: marquee 25s linear infinite;
+  width: max-content;
+}
+.marquee-item {
+  font-size: 12px; font-weight: 600; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--muted2);
+  white-space: nowrap; display: flex; align-items: center; gap: 16px;
+}
+.marquee-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--cyan); flex-shrink: 0; }
+
+/* ── SECTION GÉNÉRIQUE ── */
+section { padding: 120px 60px; }
+
+.section-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--cyan);
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border-bright); max-width: 80px; }
+
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 5vw, 60px);
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--white);
+  margin-bottom: 20px;
+}
+.section-title em { font-style: italic; color: var(--cyan); }
+
+.section-desc {
+  font-size: 15px; color: var(--muted);
+  line-height: 1.8; max-width: 500px;
+}
+
+/* ── FEATURES ── */
+.features { background: var(--black2); }
+.features-inner { max-width: 1200px; margin: 0 auto; }
+.features-header { max-width: 600px; margin-bottom: 80px; }
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2px;
+}
+
+.feat-card {
+  background: var(--surface);
+  padding: 48px 40px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s ease;
+}
+.feat-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.feat-card:hover { background: var(--surface2); }
+.feat-card:hover::before { opacity: 1; }
+
+.feat-number {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 64px; font-weight: 300;
+  color: rgba(0,229,255,0.08);
+  line-height: 1;
+  margin-bottom: 24px;
+  transition: color 0.3s ease;
+}
+.feat-card:hover .feat-number { color: rgba(0,229,255,0.15); }
+
+.feat-icon {
+  width: 48px; height: 48px;
+  border: 1px solid var(--border-bright);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
+}
+.feat-card:hover .feat-icon {
+  border-color: var(--cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+.feat-title {
+  font-size: 18px; font-weight: 600;
+  color: var(--white);
+  margin-bottom: 12px;
+}
+.feat-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+/* ── DEMO CHAT ── */
+.demo { background: var(--black); }
+.demo-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: center;
+}
+.demo-text .section-desc { margin-bottom: 40px; }
+
+.demo-perks { display: flex; flex-direction: column; gap: 16px; }
+.perk {
+  display: flex; align-items: center; gap: 14px;
+  font-size: 14px; color: var(--muted);
+}
+.perk-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--cyan); flex-shrink: 0;
+}
+
+.chat-window {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+}
+.chat-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.chat-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyan), var(--violet));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.chat-name { font-size: 14px; font-weight: 600; color: var(--white); }
+.chat-status { font-size: 11px; color: var(--cyan); }
+.chat-dot { width: 6px; height: 6px; border-radius: 50%; background: #00e676; margin-left: auto; animation: blink 2s infinite; }
+
+.chat-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; min-height: 320px; }
+
+.msg { display: flex; gap: 10px; align-items: flex-end; }
+.msg.user { flex-direction: row-reverse; }
+
+.msg-bubble {
+  max-width: 75%;
+  padding: 12px 18px;
+  border-radius: 16px;
+  font-size: 13px; line-height: 1.6;
+}
+.msg.bot .msg-bubble {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--white);
+  border-bottom-left-radius: 4px;
+}
+.msg.user .msg-bubble {
+  background: linear-gradient(135deg, var(--cyan), rgba(0,229,255,0.7));
+  color: var(--black);
+  font-weight: 500;
+  border-bottom-right-radius: 4px;
+}
+.msg-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+}
+
+.typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.typing span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--muted2);
+  animation: typingDot 1.4s infinite;
+}
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+
+.chat-input-row {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 10px; align-items: center;
+}
+.chat-input {
+  flex: 1; background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; color: var(--white);
+  outline: none;
+}
+.chat-input::placeholder { color: var(--muted2); }
+.chat-input:focus { border-color: var(--cyan); }
+.chat-send {
+  width: 38px; height: 38px;
+  background: var(--cyan);
+  border: none; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px;
+  transition: all 0.2s ease;
+}
+.chat-send:hover { transform: scale(1.1); box-shadow: var(--glow-cyan); }
+
+/* ── PRICING ── */
+.pricing { background: var(--black2); }
+.pricing-inner { max-width: 1100px; margin: 0 auto; }
+.pricing-header { text-align: center; max-width: 600px; margin: 0 auto 80px; }
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+
+.price-card {
+  background: var(--surface);
+  padding: 48px 40px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+.price-card.featured {
+  background: var(--surface2);
+  border: 1px solid rgba(0,229,255,0.3);
+}
+.price-card.featured::before {
+  content: 'Populaire';
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--cyan); color: var(--black);
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; padding: 4px 16px; border-radius: 20px;
+}
+
+.price-plan { font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+.price-amount {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 52px; font-weight: 300; color: var(--white);
+  margin-bottom: 4px; line-height: 1;
+}
+.price-amount span { font-size: 18px; vertical-align: top; margin-top: 10px; display: inline-block; }
+.price-period { font-size: 12px; color: var(--muted); margin-bottom: 32px; }
+.price-divider { height: 1px; background: var(--border); margin-bottom: 32px; }
+
+.price-features { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+.price-feat { font-size: 13px; color: var(--muted); display: flex; gap: 10px; align-items: flex-start; }
+.price-feat::before { content: '✓'; color: var(--cyan); font-weight: 700; flex-shrink: 0; }
+.price-feat.no { color: var(--muted2); }
+.price-feat.no::before { content: '×'; color: var(--muted2); }
+
+.price-btn {
+  width: 100%; padding: 14px;
+  background: transparent;
+  border: 1px solid var(--border-bright);
+  color: var(--white);
+  font-family: 'Syne', sans-serif;
+  font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+  border-radius: 2px; cursor: pointer;
+  transition: all 0.3s ease;
+}
+.price-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+.price-btn.featured-btn {
+  background: var(--cyan); border-color: var(--cyan); color: var(--black);
+}
+.price-btn.featured-btn:hover { box-shadow: var(--glow-cyan); transform: translateY(-2px); }
+
+/* ── TESTIMONIALS ── */
+.testi { background: var(--black); }
+.testi-inner { max-width: 1100px; margin: 0 auto; }
+.testi-header { max-width: 500px; margin-bottom: 60px; }
+.testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+.testi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 36px;
+  transition: all 0.3s ease;
+}
+.testi-card:hover { border-color: var(--border-bright); transform: translateY(-4px); }
+
+.testi-stars { color: var(--cyan); font-size: 14px; margin-bottom: 20px; letter-spacing: 2px; }
+.testi-text { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 300; color: var(--white); line-height: 1.6; font-style: italic; margin-bottom: 24px; }
+.testi-author { display: flex; align-items: center; gap: 12px; }
+.testi-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet), var(--cyan));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.testi-name { font-size: 13px; font-weight: 600; color: var(--white); }
+.testi-role { font-size: 11px; color: var(--muted); }
+
+/* ── CTA FINAL ── */
+.cta-section {
+  padding: 160px 60px;
+  background: var(--black2);
+  position: relative; overflow: hidden;
+  text-align: center;
+}
+.cta-section::before {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cta-inner { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; }
+.cta-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(44px, 6vw, 72px);
+  font-weight: 300; line-height: 1.1;
+  color: var(--white); margin-bottom: 24px;
+}
+.cta-title em { font-style: italic; color: var(--cyan); }
+.cta-sub { font-size: 15px; color: var(--muted); margin-bottom: 48px; line-height: 1.7; }
+.cta-form { display: flex; gap: 12px; max-width: 480px; margin: 0 auto; }
+.cta-input {
+  flex: 1; background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-radius: 2px;
+  padding: 16px 20px;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px; color: var(--white);
+  outline: none; transition: border-color 0.2s;
+}
+.cta-input::placeholder { color: var(--muted2); }
+.cta-input:focus { border-color: var(--cyan); }
+.cta-submit {
+  padding: 16px 28px;
+  background: var(--cyan);
+  color: var(--black);
+  font-family: 'Syne', sans-serif;
+  font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  border: none; border-radius: 2px; cursor: pointer;
+  transition: all 0.3s ease; white-space: nowrap;
+}
+.cta-submit:hover { box-shadow: var(--glow-cyan); transform: translateY(-2px); }
+
+/* ── FOOTER ── */
+footer {
+  padding: 60px;
+  border-top: 1px solid var(--border);
+  background: var(--black);
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: gap;
+}
+.footer-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px; font-weight: 600; letter-spacing: 2px;
+  color: var(--white);
+}
+.footer-logo span { color: var(--cyan); }
+.footer-copy { font-size: 12px; color: var(--muted2); }
+.footer-links { display: flex; gap: 32px; }
+.footer-links a { font-size: 12px; color: var(--muted); text-decoration: none; letter-spacing: 1px; transition: color 0.2s; }
+.footer-links a:hover { color: var(--cyan); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scrollPulse {
+  0%, 100% { opacity: 1; transform: scaleY(1); }
+  50% { opacity: 0.3; transform: scaleY(0.5); }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes typingDot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  nav { padding: 20px 24px; }
+  .nav-links { display: none; }
+  section { padding: 80px 24px; }
+  .hero { padding: 100px 24px 60px; }
+  .demo-inner { grid-template-columns: 1fr; gap: 48px; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .testi-grid { grid-template-columns: 1fr; }
+  footer { flex-direction: column; gap: 24px; text-align: center; padding: 40px 24px; }
+  .cta-form { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="logo">Nexo<span>ra</span></a>
+  <ul class="nav-links">
+    <li><a href="#features">Fonctionnalités</a></li>
+    <li><a href="#demo">Démo</a></li>
+    <li><a href="#pricing">Tarifs</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta"><span>Démarrer</span></a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Intelligence Artificielle · Nouvelle génération</div>
+    <h1 class="hero-title">
+      Votre assistant<br>
+      <em>intelligent</em><br>
+      travaille <span class="accent">24h/24</span>
+    </h1>
+    <p class="hero-sub">Nexora transforme chaque interaction client en opportunité. Un chatbot IA sur mesure, déployé en quelques minutes sur votre site web.</p>
+    <div class="hero-btns">
+      <a href="#demo" class="btn-primary">Voir la démo →</a>
+      <a href="#contact" class="btn-ghost">Démarrer gratuitement</a>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Découvrir</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <div class="marquee-item"><span class="marquee-dot"></span>FAQ Automatisée</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Collecte de Leads</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Prise de Rendez-vous</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Support 24/7</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Présentation Produits</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Mistral AI</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Multilingue</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Sans Code</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>FAQ Automatisée</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Collecte de Leads</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Prise de Rendez-vous</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Support 24/7</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Présentation Produits</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Mistral AI</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Multilingue</div>
+    <div class="marquee-item"><span class="marquee-dot"></span>Sans Code</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="features-inner">
+    <div class="features-header">
+      <div class="section-label">Fonctionnalités</div>
+      <h2 class="section-title">Tout ce dont votre<br>entreprise a <em>besoin</em></h2>
+      <p class="section-desc">De la réponse instantanée à la collecte de contacts — Nexora gère tout, sans interruption.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-number">01</div>
+        <div class="feat-icon">💬</div>
+        <div class="feat-title">FAQ Intelligente</div>
+        <div class="feat-desc">Répondez automatiquement aux questions fréquentes de vos clients. Nexora apprend de votre contenu et s'améliore continuellement.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-number">02</div>
+        <div class="feat-icon">📅</div>
+        <div class="feat-title">Prise de Rendez-vous</div>
+        <div class="feat-desc">Vos clients réservent directement dans la conversation, sans formulaire externe. Synchronisation automatique avec votre agenda.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-number">03</div>
+        <div class="feat-icon">🎯</div>
+        <div class="feat-title">Collecte de Leads</div>
+        <div class="feat-desc">Capturez nom, email et numéro de téléphone naturellement dans la conversation. Vos prospects qualifiés centralisés en un clic.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-number">04</div>
+        <div class="feat-icon">🛍️</div>
+        <div class="feat-title">Catalogue Produits</div>
+        <div class="feat-desc">Présentez vos produits et services de manière interactive. Nexora guide chaque visiteur vers la bonne offre.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-number">05</div>
+        <div class="feat-icon">🌍</div>
+        <div class="feat-title">Multilingue</div>
+        <div class="feat-desc">Français, anglais, et plus. Nexora s'adapte à la langue de votre client automatiquement pour une expérience locale.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-number">06</div>
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">Déploiement Instant</div>
+        <div class="feat-desc">Configurez votre assistant en moins de 5 minutes. Aucune ligne de code requise. Intégration sur votre site en un copier-coller.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section class="demo" id="demo">
+  <div class="demo-inner">
+    <div class="demo-text">
+      <div class="section-label">Démo Interactive</div>
+      <h2 class="section-title">Voyez <em>Nexora</em><br>en action</h2>
+      <p class="section-desc">Testez une conversation réelle avec un assistant configuré pour un hôtel de Libreville. Posez vos questions et observez.</p>
+      <div class="demo-perks">
+        <div class="perk"><span class="perk-dot"></span>Réponses en moins de 2 secondes</div>
+        <div class="perk"><span class="perk-dot"></span>Mémoire contextuelle de la conversation</div>
+        <div class="perk"><span class="perk-dot"></span>Adaptation au ton de votre marque</div>
+        <div class="perk"><span class="perk-dot"></span>Aucune réponse générique — 100% personnalisé</div>
+      </div>
+    </div>
+    <div class="chat-window">
+      <div class="chat-header">
+        <div class="chat-avatar">✦</div>
+        <div>
+          <div class="chat-name">Nexora — Hôtel Tropicana</div>
+          <div class="chat-status">Assistant IA · Powered by Nexora</div>
+        </div>
+        <div class="chat-dot"></div>
+      </div>
+      <div class="chat-body" id="chatBody">
+        <div class="msg bot">
+          <div class="msg-avatar">✦</div>
+          <div class="msg-bubble">Bonjour ! 👋 Je suis l'assistant de l'Hôtel Tropicana. Comment puis-je vous aider aujourd'hui ? Réservation, tarifs, services disponibles ?</div>
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chatInput" type="text" placeholder="Posez votre question..." onkeydown="if(event.key==='Enter') sendMsg()">
+        <button class="chat-send" onclick="sendMsg()">→</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="pricing-inner">
+    <div class="pricing-header">
+      <div class="section-label">Tarifs</div>
+      <h2 class="section-title">Simple,<br><em>transparent</em></h2>
+      <p class="section-desc" style="margin:0 auto">Commencez gratuitement. Évoluez selon vos besoins. Sans engagement.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-plan">Starter</div>
+        <div class="price-amount"><span>FCFA </span>0</div>
+        <div class="price-period">Pour toujours gratuit</div>
+        <div class="price-divider"></div>
+        <div class="price-features">
+          <div class="price-feat">1 assistant IA</div>
+          <div class="price-feat">500 messages / mois</div>
+          <div class="price-feat">FAQ automatisée</div>
+          <div class="price-feat">Intégration site web</div>
+          <div class="price-feat no">Collecte de leads</div>
+          <div class="price-feat no">Prise de rendez-vous</div>
+        </div>
+        <button class="price-btn">Commencer →</button>
+      </div>
+      <div class="price-card featured">
+        <div class="price-plan">Business</div>
+        <div class="price-amount"><span>FCFA </span>75k</div>
+        <div class="price-period">par mois · sans engagement</div>
+        <div class="price-divider"></div>
+        <div class="price-features">
+          <div class="price-feat">3 assistants IA</div>
+          <div class="price-feat">Messages illimités</div>
+          <div class="price-feat">FAQ + Produits + RDV</div>
+          <div class="price-feat">Collecte de leads</div>
+          <div class="price-feat">Tableau de bord analytics</div>
+          <div class="price-feat">Support prioritaire</div>
+        </div>
+        <button class="price-btn featured-btn">Démarrer maintenant →</button>
+      </div>
+      <div class="price-card">
+        <div class="price-plan">Entreprise</div>
+        <div class="price-amount" style="font-size:36px; padding-top:8px">Sur mesure</div>
+        <div class="price-period">Contactez-nous</div>
+        <div class="price-divider"></div>
+        <div class="price-features">
+          <div class="price-feat">Assistants illimités</div>
+          <div class="price-feat">API complète</div>
+          <div class="price-feat">Intégration CRM / ERP</div>
+          <div class="price-feat">Formation de l'équipe</div>
+          <div class="price-feat">SLA garanti 99.9%</div>
+          <div class="price-feat">Account manager dédié</div>
+        </div>
+        <button class="price-btn">Nous contacter →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testi">
+  <div class="testi-inner">
+    <div class="testi-header">
+      <div class="section-label">Témoignages</div>
+      <h2 class="section-title">Ce qu'ils<br><em>disent</em></h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Nexora a réduit nos appels entrants de 60%. Nos clients obtiennent une réponse instantanée, même à 23h."</div>
+        <div class="testi-author">
+          <div class="testi-avatar">🏨</div>
+          <div>
+            <div class="testi-name">Directeur Général</div>
+            <div class="testi-role">Hôtel 4 étoiles · Libreville</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"En 3 semaines, Nexora a collecté 140 leads qualifiés. Notre équipe commerciale n'a jamais été aussi productive."</div>
+        <div class="testi-author">
+          <div class="testi-avatar">🏥</div>
+          <div>
+            <div class="testi-name">Responsable Marketing</div>
+            <div class="testi-role">Clinique Privée · Port-Gentil</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"L'installation a pris 10 minutes. Le ROI a été immédiat. Je recommande Nexora à toutes les PME africaines."</div>
+        <div class="testi-author">
+          <div class="testi-avatar">🛒</div>
+          <div>
+            <div class="testi-name">Fondateur</div>
+            <div class="testi-role">E-commerce · Libreville</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="cta-inner">
+    <div class="section-label" style="justify-content:center">Prêt à démarrer ?</div>
+    <h2 class="cta-title">Votre assistant IA<br><em>vous attend</em></h2>
+    <p class="cta-sub">Rejoignez les entreprises africaines qui ont choisi Nexora. Démarrez gratuitement, sans carte bancaire.</p>
+    <div class="cta-form">
+      <input class="cta-input" type="email" placeholder="Votre adresse email">
+      <button class="cta-submit">Démarrer →</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Nexo<span>ra</span></div>
+  <div class="footer-links">
+    <a href="#">Fonctionnalités</a>
+    <a href="#">Tarifs</a>
+    <a href="#">Contact</a>
+  </div>
+  <div class="footer-copy">© 2025 Nexora · Conçu par Paul Allan Junior MEYE SIKA</div>
+</footer>
+
+<script>
+// ── Cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx - 4 + 'px';
+  cursor.style.top = my - 4 + 'px';
+  ring.style.left = mx - 18 + 'px';
+  ring.style.top = my - 18 + 'px';
+});
+document.querySelectorAll('a, button, input').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.transform = 'scale(2.5)';
+    ring.style.transform = 'scale(1.5)';
+    ring.style.borderColor = 'rgba(0,229,255,0.7)';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.transform = 'scale(1)';
+    ring.style.transform = 'scale(1)';
+    ring.style.borderColor = 'rgba(0,229,255,0.4)';
+  });
+});
+
+// ── Nav scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// ── Chat demo
+// ── CONFIG API — remplace par ton URL Render une fois déployé
+const API_URL = "https://nexora-api.onrender.com";
+let chatHistory = [];
+
+function appendMsg(role, text) {
+  const body = document.getElementById('chatBody');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.innerHTML = role === 'bot'
+    ? `<div class="msg-avatar">✦</div><div class="msg-bubble">${text}</div>`
+    : `<div class="msg-bubble">${text}</div>`;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+  return div;
+}
+
+function showTyping() {
+  const body = document.getElementById('chatBody');
+  const div = document.createElement('div');
+  div.className = 'msg bot'; div.id = 'nexora-typing';
+  div.innerHTML = `<div class="msg-avatar">✦</div><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function hideTyping() {
+  document.getElementById('nexora-typing')?.remove();
+}
+
+async function sendMsg() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  appendMsg('user', text);
+  input.value = '';
+  showTyping();
+
+  try {
+    const res = await fetch(`${API_URL}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, history: chatHistory })
+    });
+    const data = await res.json();
+    hideTyping();
+    const reply = data.reply || "Je n'ai pas pu traiter votre demande. Réessayez !";
+    appendMsg('bot', reply);
+    chatHistory.push({ role: 'user', content: text });
+    chatHistory.push({ role: 'assistant', content: reply });
+    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+  } catch (err) {
+    hideTyping();
+    appendMsg('bot', "⚠️ Le serveur Nexora est momentanément indisponible. Contactez-nous au +241 01 44 55 66.");
+  }
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.feat-card, .price-card, .testi-card').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(30px)';
+  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>
