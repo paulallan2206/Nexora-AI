@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexora — Dashboard Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #080810; --surface: #111120; --surface2: #16162a;
+  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13);
+  --cyan: #00e5ff; --violet: #9d6fff; --green: #00e676; --amber: #ffab00;
+  --white: #f0f0f8; --muted: rgba(240,240,248,0.5); --muted2: rgba(240,240,248,0.25);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Syne',sans-serif; background:var(--black); color:var(--white); min-height:100vh; }
+
+/* LOGIN */
+#loginScreen {
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(0,229,255,0.05) 0%, transparent 70%);
+}
+.login-box {
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:20px; padding:56px 48px; width:100%; max-width:420px; text-align:center;
+}
+.login-logo { font-family:'Cormorant Garamond',serif; font-size:36px; font-weight:600; margin-bottom:8px; }
+.login-logo span { color:var(--cyan); }
+.login-sub { font-size:13px; color:var(--muted); margin-bottom:40px; }
+.login-input {
+  width:100%; padding:14px 18px; background:var(--surface2); border:1px solid var(--border2);
+  border-radius:10px; color:var(--white); font-family:'Syne',sans-serif; font-size:14px;
+  outline:none; margin-bottom:14px; transition:border-color 0.2s;
+}
+.login-input:focus { border-color:var(--cyan); }
+.login-btn {
+  width:100%; padding:15px; background:var(--cyan); color:var(--black);
+  font-family:'Syne',sans-serif; font-size:13px; font-weight:700;
+  letter-spacing:2px; text-transform:uppercase; border:none; border-radius:10px;
+  cursor:pointer; transition:all 0.3s;
+}
+.login-btn:hover { box-shadow:0 0 30px rgba(0,229,255,0.3); transform:translateY(-2px); }
+.login-error { color:#ff5252; font-size:12px; margin-top:10px; display:none; }
+
+/* DASHBOARD */
+#dashboard { display:none; }
+
+.topbar {
+  padding:20px 40px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(8,8,16,0.9); backdrop-filter:blur(20px);
+  position:sticky; top:0; z-index:10;
+}
+.topbar-logo { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:600; }
+.topbar-logo span { color:var(--cyan); }
+.topbar-right { display:flex; align-items:center; gap:16px; }
+.topbar-badge {
+  padding:4px 12px; background:rgba(0,230,118,0.1); border:1px solid rgba(0,230,118,0.3);
+  border-radius:20px; font-size:11px; color:var(--green); letter-spacing:1px;
+}
+.logout-btn {
+  padding:8px 20px; background:transparent; border:1px solid var(--border2);
+  border-radius:6px; color:var(--muted); font-family:'Syne',sans-serif; font-size:12px;
+  cursor:pointer; transition:all 0.2s;
+}
+.logout-btn:hover { border-color:#ff5252; color:#ff5252; }
+
+.dash-body { padding:40px; max-width:1300px; margin:0 auto; }
+
+/* STATS */
+.stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:40px; }
+.stat-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; padding:28px 32px;
+  transition:border-color 0.2s, transform 0.2s;
+}
+.stat-card:hover { border-color:var(--border2); transform:translateY(-3px); }
+.stat-label { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+.stat-num { font-family:'Cormorant Garamond',serif; font-size:52px; font-weight:300; line-height:1; }
+.stat-num.cyan { color:var(--cyan); }
+.stat-num.violet { color:var(--violet); }
+.stat-num.green { color:var(--green); }
+.stat-sub { font-size:12px; color:var(--muted2); margin-top:6px; }
+
+/* TABS */
+.tabs { display:flex; gap:4px; margin-bottom:24px; border-bottom:1px solid var(--border); }
+.tab {
+  padding:12px 24px; font-size:13px; font-weight:500; color:var(--muted);
+  cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; margin-bottom:-1px;
+}
+.tab.active { color:var(--cyan); border-bottom-color:var(--cyan); }
+.tab:hover { color:var(--white); }
+
+/* TABLES */
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
+.data-table {
+  width:100%; border-collapse:collapse;
+  background:var(--surface); border-radius:14px; overflow:hidden;
+  border:1px solid var(--border);
+}
+.data-table th {
+  padding:14px 20px; font-size:11px; font-weight:600;
+  letter-spacing:1.5px; text-transform:uppercase; color:var(--muted);
+  background:var(--surface2); text-align:left; border-bottom:1px solid var(--border);
+}
+.data-table td {
+  padding:14px 20px; font-size:13px; color:var(--white);
+  border-bottom:1px solid var(--border); max-width:280px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.data-table tr:last-child td { border-bottom:none; }
+.data-table tr:hover td { background:var(--surface2); }
+
+.badge {
+  padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600;
+  display:inline-block;
+}
+.badge-chat { background:rgba(0,229,255,0.1); color:var(--cyan); }
+.badge-sub  { background:rgba(157,111,255,0.1); color:var(--violet); }
+.badge-ok   { background:rgba(0,230,118,0.1); color:var(--green); }
+
+.empty-state {
+  text-align:center; padding:60px; color:var(--muted);
+  font-size:14px;
+}
+.empty-state .icon { font-size:40px; margin-bottom:12px; display:block; opacity:0.3; }
+
+/* REFRESH */
+.refresh-btn {
+  padding:10px 20px; background:transparent; border:1px solid var(--border2);
+  border-radius:8px; color:var(--cyan); font-family:'Syne',sans-serif; font-size:12px;
+  cursor:pointer; transition:all 0.2s; margin-bottom:24px;
+}
+.refresh-btn:hover { background:rgba(0,229,255,0.05); }
+
+@media(max-width:768px) {
+  .stats-grid { grid-template-columns:1fr; }
+  .dash-body { padding:20px; }
+  .topbar { padding:16px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">Nexo<span>ra</span></div>
+    <div class="login-sub">Dashboard Administrateur</div>
+    <input class="login-input" type="password" id="pwdInput" placeholder="Mot de passe admin" onkeydown="if(event.key==='Enter') login()">
+    <button class="login-btn" onclick="login()">Accéder au dashboard →</button>
+    <div class="login-error" id="loginError">Mot de passe incorrect</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="topbar">
+    <div class="topbar-logo">Nexo<span>ra</span> <span style="font-size:14px;color:var(--muted);font-family:Syne">Admin</span></div>
+    <div class="topbar-right">
+      <div class="topbar-badge">● EN LIGNE</div>
+      <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    </div>
+  </div>
+
+  <div class="dash-body">
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Leads collectés</div>
+        <div class="stat-num cyan" id="statLeads">—</div>
+        <div class="stat-sub">Contacts intéressés</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Conversations IA</div>
+        <div class="stat-num violet" id="statConvs">—</div>
+        <div class="stat-sub">Messages traités par Nexora</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Abonnés</div>
+        <div class="stat-num green" id="statSubs">—</div>
+        <div class="stat-sub">Inscriptions via le site</div>
+      </div>
+    </div>
+
+    <button class="refresh-btn" onclick="loadData()">↻ Actualiser les données</button>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('leads')">Leads</div>
+      <div class="tab" onclick="switchTab('conversations')">Conversations</div>
+      <div class="tab" onclick="switchTab('subscribers')">Abonnés</div>
+    </div>
+
+    <!-- Leads -->
+    <div class="tab-content active" id="tab-leads">
+      <table class="data-table" id="leadsTable">
+        <thead><tr>
+          <th>Nom</th><th>Email</th><th>Téléphone</th><th>Source</th><th>Message</th><th>Date</th>
+        </tr></thead>
+        <tbody id="leadsBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Conversations -->
+    <div class="tab-content" id="tab-conversations">
+      <table class="data-table">
+        <thead><tr>
+          <th>Session</th><th>Message client</th><th>Réponse IA</th><th>Date</th>
+        </tr></thead>
+        <tbody id="convsBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Subscribers -->
+    <div class="tab-content" id="tab-subscribers">
+      <table class="data-table">
+        <thead><tr>
+          <th>Email</th><th>Plan</th><th>Statut</th><th>Date</th>
+        </tr></thead>
+        <tbody id="subsBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API = "";  // même domaine
+let TOKEN = "";
+
+async function login() {
+  const pwd = document.getElementById("pwdInput").value;
+  try {
+    const res = await fetch(`${API}/admin/login`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({password: pwd})
+    });
+    const data = await res.json();
+    if (res.ok) {
+      TOKEN = data.token;
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("dashboard").style.display = "block";
+      loadData();
+    } else {
+      document.getElementById("loginError").style.display = "block";
+    }
+  } catch(e) {
+    document.getElementById("loginError").style.display = "block";
+  }
+}
+
+function logout() {
+  TOKEN = "";
+  document.getElementById("loginScreen").style.display = "flex";
+  document.getElementById("dashboard").style.display = "none";
+  document.getElementById("pwdInput").value = "";
+}
+
+function switchTab(name) {
+  document.querySelectorAll(".tab").forEach((t,i) => {
+    t.classList.toggle("active", ["leads","conversations","subscribers"][i] === name);
+  });
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+  document.getElementById("tab-" + name).classList.add("active");
+}
+
+function fmt(dateStr) {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleString("fr-FR", {day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+}
+
+function truncate(str, n=50) {
+  if (!str) return "—";
+  return str.length > n ? str.substring(0,n) + "..." : str;
+}
+
+async function loadData() {
+  try {
+    const res  = await fetch(`${API}/admin/data?token=${TOKEN}`);
+    const data = await res.json();
+    if (!res.ok) { logout(); return; }
+
+    // Stats
+    document.getElementById("statLeads").textContent = data.stats.leads ?? 0;
+    document.getElementById("statConvs").textContent = data.stats.conversations ?? 0;
+    document.getElementById("statSubs").textContent  = data.stats.subscribers ?? 0;
+
+    // Leads
+    const lb = document.getElementById("leadsBody");
+    if (!data.leads?.length) {
+      lb.innerHTML = `<tr><td colspan="6"><div class="empty-state"><span class="icon">🎯</span>Aucun lead pour le moment</div></td></tr>`;
+    } else {
+      lb.innerHTML = data.leads.map(l => `
+        <tr>
+          <td>${l.nom || "—"}</td>
+          <td>${l.email || "—"}</td>
+          <td>${l.telephone || "—"}</td>
+          <td><span class="badge badge-chat">${l.source || "chat"}</span></td>
+          <td title="${l.message || ""}">${truncate(l.message)}</td>
+          <td>${fmt(l.created_at)}</td>
+        </tr>`).join("");
+    }
+
+    // Conversations
+    const cb = document.getElementById("convsBody");
+    if (!data.conversations?.length) {
+      cb.innerHTML = `<tr><td colspan="4"><div class="empty-state"><span class="icon">💬</span>Aucune conversation pour le moment</div></td></tr>`;
+    } else {
+      cb.innerHTML = data.conversations.map(c => `
+        <tr>
+          <td><code style="font-size:11px;color:var(--muted)">${(c.session_id||"").substring(0,12)}...</code></td>
+          <td title="${c.user_message||""}">${truncate(c.user_message, 60)}</td>
+          <td title="${c.bot_reply||""}">${truncate(c.bot_reply, 80)}</td>
+          <td>${fmt(c.created_at)}</td>
+        </tr>`).join("");
+    }
+
+    // Subscribers
+    const sb = document.getElementById("subsBody");
+    if (!data.subscribers?.length) {
+      sb.innerHTML = `<tr><td colspan="4"><div class="empty-state"><span class="icon">📧</span>Aucun abonné pour le moment</div></td></tr>`;
+    } else {
+      sb.innerHTML = data.subscribers.map(s => `
+        <tr>
+          <td>${s.email || "—"}</td>
+          <td><span class="badge badge-sub">${s.plan || "starter"}</span></td>
+          <td><span class="badge badge-ok">${s.status || "pending"}</span></td>
+          <td>${fmt(s.created_at)}</td>
+        </tr>`).join("");
+    }
+
+  } catch(e) {
+    console.error("Erreur chargement data:", e);
+  }
+}
+
+// Refresh auto toutes les 60s
+setInterval(() => { if (TOKEN) loadData(); }, 60000);
+</script>
+</body>
+</html>
