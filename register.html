@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexora — Créer un compte</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#080810;--surface:#111120;--surface2:#16162a;--border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.13);--cyan:#00e5ff;--violet:#9d6fff;--white:#f0f0f8;
+  --muted:rgba(240,240,248,0.5);--red:#ff5252;--green:#00e676;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Syne',sans-serif;background:var(--black);color:var(--white);min-height:100vh;
+  display:flex;align-items:center;justify-content:center;padding:40px 20px;
+  background-image:radial-gradient(ellipse 70% 60% at 20% 50%,rgba(0,229,255,0.04) 0%,transparent 60%),
+  radial-gradient(ellipse 50% 70% at 80% 30%,rgba(157,111,255,0.05) 0%,transparent 60%);}
+.container{display:grid;grid-template-columns:1fr 1fr;gap:0;max-width:900px;width:100%;
+  background:var(--surface);border:1px solid var(--border2);border-radius:24px;overflow:hidden;
+  box-shadow:0 40px 80px rgba(0,0,0,0.5);}
+
+/* LEFT PANEL */
+.left{background:linear-gradient(135deg,#0a0a1a,#0d1a2a);padding:56px 48px;
+  display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;}
+.left::before{content:'';position:absolute;top:-100px;left:-100px;width:400px;height:400px;
+  background:radial-gradient(circle,rgba(0,229,255,0.06) 0%,transparent 70%);pointer-events:none;}
+.brand{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;margin-bottom:40px;}
+.brand span{color:var(--cyan);}
+.left-title{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;line-height:1.2;margin-bottom:16px;}
+.left-title em{font-style:italic;color:var(--cyan);}
+.left-desc{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:40px;}
+.features{display:flex;flex-direction:column;gap:14px;}
+.feat{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--muted);}
+.feat-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);flex-shrink:0;}
+.left-bottom{font-size:12px;color:var(--muted);margin-top:auto;padding-top:40px;}
+
+/* RIGHT PANEL */
+.right{padding:56px 48px;}
+.right-title{font-size:22px;font-weight:600;margin-bottom:6px;}
+.right-sub{font-size:13px;color:var(--muted);margin-bottom:36px;}
+
+.plan-selector{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:28px;}
+.plan-opt{padding:12px 8px;border:1px solid var(--border2);border-radius:10px;text-align:center;
+  cursor:pointer;transition:all 0.2s;background:var(--surface2);}
+.plan-opt:hover{border-color:var(--cyan);}
+.plan-opt.selected{border-color:var(--cyan);background:rgba(0,229,255,0.06);}
+.plan-name{font-size:12px;font-weight:700;color:var(--white);display:block;margin-bottom:3px;}
+.plan-price{font-size:11px;color:var(--muted);}
+.plan-opt.selected .plan-name{color:var(--cyan);}
+
+.form-group{margin-bottom:16px;}
+.form-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:1px;
+  text-transform:uppercase;display:block;margin-bottom:7px;}
+.form-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;
+  padding:13px 16px;color:var(--white);font-family:'Syne',sans-serif;font-size:14px;
+  outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,0.08);}
+.form-input::placeholder{color:var(--muted);}
+
+.btn-register{width:100%;padding:15px;background:var(--cyan);color:var(--black);
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;border:none;border-radius:10px;cursor:pointer;
+  transition:all 0.3s;margin-top:8px;}
+.btn-register:hover{box-shadow:0 0 30px rgba(0,229,255,0.3);transform:translateY(-2px);}
+.btn-register:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+
+.divider{text-align:center;color:var(--muted);font-size:12px;margin:20px 0;position:relative;}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:var(--border2);}
+.divider::before{left:0;}.divider::after{right:0;}
+
+.btn-login-link{width:100%;padding:13px;background:transparent;border:1px solid var(--border2);
+  border-radius:10px;color:var(--muted);font-family:'Syne',sans-serif;font-size:13px;
+  cursor:pointer;transition:all 0.2s;text-decoration:none;display:block;text-align:center;}
+.btn-login-link:hover{border-color:var(--violet);color:var(--violet);}
+
+.msg{padding:12px 16px;border-radius:8px;font-size:13px;margin-top:14px;display:none;}
+.msg.error{background:rgba(255,82,82,0.1);border:1px solid rgba(255,82,82,0.3);color:var(--red);}
+.msg.success{background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.3);color:var(--green);}
+
+@media(max-width:700px){
+  .container{grid-template-columns:1fr;}
+  .left{display:none;}
+  .right{padding:36px 24px;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="left">
+    <div>
+      <div class="brand">Nexo<span>ra</span></div>
+      <div class="left-title">Votre assistant IA<br>en <em>5 minutes</em></div>
+      <div class="left-desc">Créez votre compte et déployez un chatbot intelligent sur votre site web. Sans coder.</div>
+      <div class="features">
+        <div class="feat"><span class="feat-dot"></span>Assistant IA propulsé par Mistral</div>
+        <div class="feat"><span class="feat-dot"></span>Réponses 24h/24 à vos clients</div>
+        <div class="feat"><span class="feat-dot"></span>Collecte automatique de leads</div>
+        <div class="feat"><span class="feat-dot"></span>Dashboard analytics inclus</div>
+        <div class="feat"><span class="feat-dot"></span>Déploiement en 1 copier-coller</div>
+      </div>
+    </div>
+    <div class="left-bottom">© 2025 Nexora · Conçu par Paul Allan Junior MEYE SIKA</div>
+  </div>
+
+  <div class="right">
+    <div class="right-title">Créer mon compte</div>
+    <div class="right-sub">Démarrez gratuitement, sans carte bancaire</div>
+
+    <div class="plan-selector">
+      <div class="plan-opt selected" onclick="selectPlan('starter',this)">
+        <span class="plan-name">Starter</span>
+        <span class="plan-price">Gratuit</span>
+      </div>
+      <div class="plan-opt" onclick="selectPlan('business',this)">
+        <span class="plan-name">Business</span>
+        <span class="plan-price">75k FCFA/mois</span>
+      </div>
+      <div class="plan-opt" onclick="selectPlan('enterprise',this)">
+        <span class="plan-name">Entreprise</span>
+        <span class="plan-price">Sur mesure</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Nom de votre entreprise</label>
+      <input class="form-input" id="company" type="text" placeholder="Ex: Hôtel Tropicana">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Adresse email</label>
+      <input class="form-input" id="email" type="email" placeholder="vous@entreprise.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Mot de passe</label>
+      <input class="form-input" id="password" type="password" placeholder="Minimum 6 caractères">
+    </div>
+
+    <button class="btn-register" id="registerBtn" onclick="register()">Créer mon compte →</button>
+
+    <div class="divider">ou</div>
+    <a class="btn-login-link" href="/login">J'ai déjà un compte — Se connecter</a>
+
+    <div class="msg" id="msgBox"></div>
+  </div>
+</div>
+
+<script>
+let selectedPlan = "starter";
+
+function selectPlan(plan, el) {
+  selectedPlan = plan;
+  document.querySelectorAll(".plan-opt").forEach(p => p.classList.remove("selected"));
+  el.classList.add("selected");
+}
+
+async function register() {
+  const company  = document.getElementById("company").value.trim();
+  const email    = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const btn      = document.getElementById("registerBtn");
+  const msg      = document.getElementById("msgBox");
+
+  if (!company || !email || !password) {
+    showMsg("Veuillez remplir tous les champs.", "error"); return;
+  }
+  if (!email.includes("@")) {
+    showMsg("Email invalide.", "error"); return;
+  }
+  if (password.length < 6) {
+    showMsg("Mot de passe trop court (minimum 6 caractères).", "error"); return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Création en cours...";
+
+  try {
+    const res = await fetch("/auth/register", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({email, password, company, plan: selectedPlan})
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      localStorage.setItem("nexora_token",     data.token);
+      localStorage.setItem("nexora_client_id", data.client_id);
+      localStorage.setItem("nexora_company",   data.company);
+      showMsg("Compte créé ! Redirection...", "success");
+      setTimeout(() => window.location.href = "/dashboard", 1200);
+    } else {
+      showMsg(data.error || "Erreur lors de l'inscription.", "error");
+      btn.disabled = false;
+      btn.textContent = "Créer mon compte →";
+    }
+  } catch(e) {
+    showMsg("Erreur de connexion au serveur.", "error");
+    btn.disabled = false;
+    btn.textContent = "Créer mon compte →";
+  }
+}
+
+function showMsg(text, type) {
+  const box = document.getElementById("msgBox");
+  box.textContent = text;
+  box.className = `msg ${type}`;
+  box.style.display = "block";
+}
+
+// Pré-remplir l'email si venu du site vitrine
+const params = new URLSearchParams(window.location.search);
+if (params.get("email")) document.getElementById("email").value = params.get("email");
+if (params.get("plan"))  selectPlan(params.get("plan"), document.querySelectorAll(".plan-opt")[["starter","business","enterprise"].indexOf(params.get("plan"))]);
+</script>
+</body>
+</html>

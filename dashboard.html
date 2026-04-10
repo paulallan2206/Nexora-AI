@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexora — Mon Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#080810;--surface:#111120;--surface2:#16162a;--surface3:#1c1c35;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --cyan:#00e5ff;--violet:#9d6fff;--green:#00e676;--amber:#ffab00;--red:#ff5252;
+  --white:#f0f0f8;--muted:rgba(240,240,248,0.5);--muted2:rgba(240,240,248,0.25);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Syne',sans-serif;background:var(--black);color:var(--white);min-height:100vh;}
+
+.sidebar{width:230px;background:var(--surface);border-right:1px solid var(--border);
+  position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:10;}
+.sidebar-logo{padding:26px 22px 20px;font-family:'Cormorant Garamond',serif;
+  font-size:22px;font-weight:600;border-bottom:1px solid var(--border);}
+.sidebar-logo span{color:var(--cyan);}
+.sidebar-company{padding:14px 22px;font-size:12px;color:var(--muted);
+  border-bottom:1px solid var(--border);background:var(--surface2);}
+.company-name{font-size:14px;font-weight:600;color:var(--white);margin-bottom:2px;}
+
+.nav{flex:1;padding:14px 10px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;
+  cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:all 0.2s;margin-bottom:3px;}
+.nav-item:hover{background:var(--surface2);color:var(--white);}
+.nav-item.active{background:rgba(0,229,255,0.08);color:var(--cyan);}
+.nav-icon{font-size:16px;width:20px;text-align:center;}
+
+.sidebar-bottom{padding:14px 10px;border-top:1px solid var(--border);}
+.plan-badge{margin:0 12px 12px;padding:8px 12px;background:rgba(0,229,255,0.06);
+  border:1px solid rgba(0,229,255,0.2);border-radius:8px;font-size:11px;}
+.plan-label{color:var(--muted);margin-bottom:2px;}
+.plan-name{color:var(--cyan);font-weight:600;text-transform:uppercase;letter-spacing:1px;}
+.btn-logout{width:100%;padding:10px;background:transparent;border:1px solid var(--border2);
+  border-radius:8px;color:var(--muted);font-family:'Syne',sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s;}
+.btn-logout:hover{border-color:var(--red);color:var(--red);}
+
+.main{margin-left:230px;padding:36px;min-height:100vh;}
+.page{display:none;}
+.page.active{display:block;}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300;}
+.page-title em{color:var(--cyan);font-style:italic;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:22px 26px;transition:all 0.2s;}
+.stat:hover{border-color:var(--border2);transform:translateY(-2px);}
+.stat-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:44px;font-weight:300;line-height:1;}
+.stat-val.c1{color:var(--cyan);}.stat-val.c2{color:var(--violet);}.stat-val.c3{color:var(--green);}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:24px 28px;margin-bottom:20px;}
+.card-title{font-size:14px;font-weight:600;margin-bottom:20px;color:var(--white);}
+
+/* WIDGET CODE */
+.code-block{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;
+  padding:16px 20px;font-family:monospace;font-size:12px;color:#7dd3fc;
+  white-space:pre-wrap;word-break:break-all;line-height:1.7;position:relative;}
+.copy-btn{position:absolute;top:10px;right:10px;padding:5px 12px;background:var(--cyan);
+  color:var(--black);border:none;border-radius:6px;font-family:'Syne',sans-serif;
+  font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.copy-btn:hover{transform:scale(1.05);}
+
+/* FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:1px;
+  text-transform:uppercase;display:block;margin-bottom:7px;}
+.form-input,.form-textarea{width:100%;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:8px;padding:11px 14px;color:var(--white);font-family:'Syne',sans-serif;
+  font-size:13px;outline:none;transition:border-color 0.2s;}
+.form-input:focus,.form-textarea:focus{border-color:var(--cyan);}
+.form-textarea{resize:vertical;min-height:70px;line-height:1.6;}
+.color-row{display:flex;align-items:center;gap:10px;}
+.color-input{width:44px;height:44px;border:1px solid var(--border2);border-radius:8px;
+  cursor:pointer;background:none;padding:2px;}
+
+.btn-save{padding:12px 28px;background:var(--cyan);color:var(--black);
+  font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;border:none;border-radius:8px;cursor:pointer;transition:all 0.3s;}
+.btn-save:hover{box-shadow:0 0 20px rgba(0,229,255,0.3);transform:translateY(-2px);}
+
+/* PREVIEW CHAT */
+.preview-wrap{display:flex;gap:20px;align-items:flex-start;}
+.preview-box{width:340px;flex-shrink:0;border-radius:16px;overflow:hidden;
+  border:1px solid var(--border2);box-shadow:0 20px 40px rgba(0,0,0,0.4);}
+.preview-header{padding:14px 18px;display:flex;align-items:center;gap:10px;}
+.preview-avatar{width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.preview-name{font-size:13px;font-weight:600;}
+.preview-status{font-size:11px;opacity:0.7;}
+.preview-body{padding:16px;min-height:160px;background:var(--surface2);}
+.preview-msg{background:var(--surface3);border-radius:10px;padding:10px 14px;
+  font-size:12px;line-height:1.6;max-width:80%;}
+.preview-input{padding:12px 16px;border-top:1px solid var(--border);
+  display:flex;gap:8px;background:var(--surface);}
+.preview-input input{flex:1;background:var(--surface2);border:none;border-radius:6px;
+  padding:8px 12px;color:var(--white);font-size:12px;outline:none;}
+.preview-send{width:30px;height:30px;border-radius:6px;border:none;
+  display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;}
+th{padding:11px 16px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);background:var(--surface2);text-align:left;border-bottom:1px solid var(--border);}
+td{padding:12px 16px;font-size:13px;color:var(--white);border-bottom:1px solid var(--border);
+  max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,0.02);}
+.badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge-user{background:rgba(0,229,255,0.1);color:var(--cyan);}
+.badge-bot{background:rgba(157,111,255,0.1);color:var(--violet);}
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:13px;}
+
+.save-toast{display:none;position:fixed;bottom:24px;right:24px;background:var(--green);
+  color:var(--black);padding:12px 22px;border-radius:10px;font-size:13px;font-weight:700;
+  box-shadow:0 8px 24px rgba(0,0,0,0.3);z-index:1000;animation:slideUp 0.3s ease;}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+@media(max-width:900px){
+  .sidebar{display:none;}.main{margin-left:0;padding:20px;}
+  .stats-grid{grid-template-columns:1fr 1fr;}.form-row{grid-template-columns:1fr;}
+  .preview-wrap{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">Nexo<span>ra</span></div>
+  <div class="sidebar-company">
+    <div class="company-name" id="sideCompany">Mon entreprise</div>
+    <div style="font-size:11px;color:var(--muted)" id="sideEmail">—</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active" onclick="showPage('overview',this)"><span class="nav-icon">📊</span>Vue d'ensemble</div>
+    <div class="nav-item" onclick="showPage('assistant',this)"><span class="nav-icon">🤖</span>Mon assistant</div>
+    <div class="nav-item" onclick="showPage('leads',this)"><span class="nav-icon">🎯</span>Mes leads</div>
+    <div class="nav-item" onclick="showPage('conversations',this)"><span class="nav-icon">💬</span>Conversations</div>
+    <div class="nav-item" onclick="showPage('integration',this)"><span class="nav-icon">🔗</span>Intégration</div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="plan-badge">
+      <div class="plan-label">Mon plan</div>
+      <div class="plan-name" id="sidePlan">Starter</div>
+    </div>
+    <button class="btn-logout" onclick="logout()">Déconnexion</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- OVERVIEW -->
+  <div class="page active" id="page-overview">
+    <div class="topbar">
+      <div class="page-title">Bienvenue, <em id="welcomeName">—</em></div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-label">Leads collectés</div><div class="stat-val c1" id="statLeads">0</div></div>
+      <div class="stat"><div class="stat-label">Conversations</div><div class="stat-val c2" id="statConvs">0</div></div>
+      <div class="stat"><div class="stat-label">Messages aujourd'hui</div><div class="stat-val c3" id="statToday">0</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🚀 Démarrage rapide</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+        <div style="padding:18px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);">
+          <div style="font-size:20px;margin-bottom:8px;">⚙️</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Configurer l'assistant</div>
+          <div style="font-size:12px;color:var(--muted);">Personnalisez le nom, les couleurs et le contenu</div>
+          <div style="margin-top:10px;font-size:12px;color:var(--cyan);cursor:pointer" onclick="showPage('assistant',document.querySelectorAll('.nav-item')[1])">Configurer →</div>
+        </div>
+        <div style="padding:18px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);">
+          <div style="font-size:20px;margin-bottom:8px;">🔗</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Intégrer sur votre site</div>
+          <div style="font-size:12px;color:var(--muted);">Copiez le code et collez sur votre site</div>
+          <div style="margin-top:10px;font-size:12px;color:var(--cyan);cursor:pointer" onclick="showPage('integration',document.querySelectorAll('.nav-item')[4])">Obtenir le code →</div>
+        </div>
+        <div style="padding:18px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);">
+          <div style="font-size:20px;margin-bottom:8px;">🎯</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Voir vos leads</div>
+          <div style="font-size:12px;color:var(--muted);">Consultez vos contacts collectés</div>
+          <div style="margin-top:10px;font-size:12px;color:var(--cyan);cursor:pointer" onclick="showPage('leads',document.querySelectorAll('.nav-item')[2])">Voir les leads →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSISTANT CONFIG -->
+  <div class="page" id="page-assistant">
+    <div class="topbar">
+      <div class="page-title">Mon <em>assistant</em></div>
+      <button class="btn-save" onclick="saveAssistant()">💾 Sauvegarder</button>
+    </div>
+    <div class="preview-wrap">
+      <div style="flex:1">
+        <div class="card">
+          <div class="card-title">🎨 Apparence</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Nom de l'assistant</label>
+              <input class="form-input" id="aName" placeholder="Ex: Sophie de Tropicana">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Couleur principale</label>
+              <div class="color-row">
+                <input type="color" class="color-input" id="aColor" value="#00e5ff" oninput="updatePreview()">
+                <input class="form-input" id="aColorHex" value="#00e5ff" oninput="syncColor()">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message d'accueil</label>
+            <textarea class="form-textarea" id="aWelcome" placeholder="Bonjour ! Comment puis-je vous aider ?" oninput="updatePreview()"></textarea>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🏢 Infos entreprise</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Nom entreprise</label>
+              <input class="form-input" id="kNom" placeholder="Ex: Hôtel Tropicana">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Type</label>
+              <input class="form-input" id="kType" placeholder="Ex: Hôtel 4 étoiles">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Téléphone</label>
+              <input class="form-input" id="kTel" placeholder="+241 01 00 00 00">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input class="form-input" id="kEmail" placeholder="contact@entreprise.com">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-textarea" id="kDesc" placeholder="Décrivez votre entreprise..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Services (un par ligne)</label>
+            <textarea class="form-textarea" id="kServices" placeholder="Service client&#10;Livraison à domicile&#10;Support 24h/24" style="min-height:90px"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREVIEW -->
+      <div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;text-align:center">Aperçu en temps réel</div>
+        <div class="preview-box" id="previewBox">
+          <div class="preview-header" id="previewHeader" style="background:#0d0d18">
+            <div class="preview-avatar" id="previewAvatar" style="background:#00e5ff">✦</div>
+            <div>
+              <div class="preview-name" id="previewName">Mon assistant</div>
+              <div class="preview-status">En ligne · Propulsé par Nexora</div>
+            </div>
+          </div>
+          <div class="preview-body">
+            <div class="preview-msg" id="previewWelcome">Bonjour ! Comment puis-je vous aider ?</div>
+          </div>
+          <div class="preview-input" style="background:#0d0d18">
+            <input type="text" placeholder="Votre message...">
+            <button class="preview-send" id="previewSend" style="background:#00e5ff;color:#080810">→</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADS -->
+  <div class="page" id="page-leads">
+    <div class="topbar">
+      <div class="page-title">Mes <em>leads</em></div>
+      <button class="btn-save" onclick="exportLeads()">⬇ Export CSV</button>
+    </div>
+    <div class="card" style="padding:0">
+      <table><thead><tr>
+        <th>Nom</th><th>Email</th><th>Téléphone</th><th>Date</th>
+      </tr></thead>
+      <tbody id="leadsBody"><tr><td colspan="4"><div class="empty">Aucun lead pour le moment</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CONVERSATIONS -->
+  <div class="page" id="page-conversations">
+    <div class="topbar"><div class="page-title">Mes <em>conversations</em></div></div>
+    <div class="card" style="padding:0">
+      <table><thead><tr>
+        <th>Expéditeur</th><th>Message</th><th>Date</th>
+      </tr></thead>
+      <tbody id="convsBody"><tr><td colspan="3"><div class="empty">Aucune conversation</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INTEGRATION -->
+  <div class="page" id="page-integration">
+    <div class="topbar"><div class="page-title">Code d'<em>intégration</em></div></div>
+    <div class="card">
+      <div class="card-title">🔗 Intégrez Nexora sur votre site web</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.7">
+        Copiez ce code et collez-le juste avant la balise <code style="color:var(--cyan)">&lt;/body&gt;</code> de votre site web. C'est tout !
+      </p>
+      <div style="position:relative">
+        <div class="code-block" id="widgetCode"></div>
+        <button class="copy-btn" onclick="copyCode()">Copier</button>
+      </div>
+      <div style="margin-top:24px;padding:16px;background:var(--surface2);border-radius:10px;
+        border-left:3px solid var(--cyan)">
+        <div style="font-size:12px;font-weight:600;color:var(--cyan);margin-bottom:6px">💡 Comment ça marche</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.7">
+          Ce script charge automatiquement votre assistant Nexora sur votre site. 
+          Il apparaît comme une bulle de chat en bas à droite. Vos visiteurs peuvent 
+          interagir avec lui immédiatement. Tous les leads sont sauvegardés dans votre dashboard.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="save-toast" id="toast"></div>
+
+<script>
+const TOKEN     = localStorage.getItem("nexora_token");
+const CLIENT_ID = localStorage.getItem("nexora_client_id");
+const API_BASE  = "";
+
+if (!TOKEN) window.location.href = "/login";
+
+let ME = {}, KNOWLEDGE = {};
+
+// ── INIT
+async function init() {
+  try {
+    const r = await fetch(`${API_BASE}/client/me?token=${TOKEN}`);
+    if (!r.ok) { logout(); return; }
+    ME = await r.json();
+
+    document.getElementById("sideCompany").textContent = ME.company || "Mon entreprise";
+    document.getElementById("sideEmail").textContent   = ME.email || "";
+    document.getElementById("sidePlan").textContent    = (ME.plan || "starter").toUpperCase();
+    document.getElementById("welcomeName").textContent = ME.company || "vous";
+
+    // Fill assistant form
+    document.getElementById("aName").value    = ME.assistant_name || `Assistant ${ME.company}`;
+    document.getElementById("aColor").value   = ME.assistant_color || "#00e5ff";
+    document.getElementById("aColorHex").value= ME.assistant_color || "#00e5ff";
+    document.getElementById("aWelcome").value = ME.welcome_msg || "Bonjour ! Comment puis-je vous aider ?";
+
+    updatePreview();
+    await loadStats();
+    await loadKnowledge();
+    generateWidgetCode();
+  } catch(e) { console.error(e); }
+}
+
+// ── STATS
+async function loadStats() {
+  try {
+    const r = await fetch(`${API_BASE}/client/stats?token=${TOKEN}`);
+    const d = await r.json();
+    document.getElementById("statLeads").textContent = d.leads ?? 0;
+    document.getElementById("statConvs").textContent = d.conversations ?? 0;
+    const today = new Date().toISOString().split("T")[0];
+    const todayCount = (d.convs_data || []).filter(c => (c.created_at||"").startsWith(today)).length;
+    document.getElementById("statToday").textContent = todayCount;
+
+    // Fill tables
+    fillLeads(d.leads_data || []);
+    fillConvs(d.convs_data || []);
+  } catch(e) {}
+}
+
+function fmt(d) {
+  if (!d) return "—";
+  return new Date(d).toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit"});
+}
+function cut(s,n=60){ return s&&s.length>n?s.slice(0,n)+"...":(s||"—"); }
+
+function fillLeads(leads) {
+  const b = document.getElementById("leadsBody");
+  b.innerHTML = !leads.length
+    ? `<tr><td colspan="4"><div class="empty">Aucun lead pour le moment — votre assistant collectera automatiquement les contacts de vos visiteurs.</div></td></tr>`
+    : leads.map(l=>`<tr><td>${l.name||"—"}</td><td>${l.email||"—"}</td><td>${l.phone||"—"}</td><td>${fmt(l.created_at)}</td></tr>`).join("");
+}
+
+function fillConvs(convs) {
+  const b = document.getElementById("convsBody");
+  b.innerHTML = !convs.length
+    ? `<tr><td colspan="3"><div class="empty">Aucune conversation pour le moment.</div></td></tr>`
+    : convs.map(c=>`<tr>
+        <td><span class="badge ${c.sender==='user'?'badge-user':'badge-bot'}">${c.sender||"?"}</span></td>
+        <td title="${c.message||""}">${cut(c.message)}</td>
+        <td>${fmt(c.created_at)}</td>
+      </tr>`).join("");
+}
+
+// ── KNOWLEDGE
+async function loadKnowledge() {
+  try {
+    const r = await fetch(`${API_BASE}/client/knowledge?token=${TOKEN}`);
+    if (!r.ok) return;
+    KNOWLEDGE = await r.json();
+    const e = KNOWLEDGE.entreprise || {};
+    document.getElementById("kNom").value      = e.nom || ME.company || "";
+    document.getElementById("kType").value     = e.type || "";
+    document.getElementById("kTel").value      = e.telephone || "";
+    document.getElementById("kEmail").value    = e.email || ME.email || "";
+    document.getElementById("kDesc").value     = KNOWLEDGE.description || "";
+    document.getElementById("kServices").value = (KNOWLEDGE.services || []).join("\n");
+  } catch(e) {}
+}
+
+// ── PREVIEW
+function updatePreview() {
+  const name    = document.getElementById("aName").value || "Mon assistant";
+  const color   = document.getElementById("aColor").value || "#00e5ff";
+  const welcome = document.getElementById("aWelcome").value || "Bonjour ! Comment puis-je vous aider ?";
+  document.getElementById("previewName").textContent    = name;
+  document.getElementById("previewWelcome").textContent = welcome;
+  document.getElementById("previewAvatar").style.background = color;
+  document.getElementById("previewSend").style.background   = color;
+  document.getElementById("previewSend").style.color = isLight(color) ? "#080810" : "#fff";
+}
+
+function isLight(hex) {
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return (r*299+g*587+b*114)/1000 > 128;
+}
+
+function syncColor() {
+  const val = document.getElementById("aColorHex").value;
+  if (/^#[0-9a-f]{6}$/i.test(val)) {
+    document.getElementById("aColor").value = val;
+    updatePreview();
+  }
+}
+
+// ── SAVE ASSISTANT
+async function saveAssistant() {
+  const services = document.getElementById("kServices").value.split("\n").filter(s=>s.trim());
+  const knowledge = {
+    ...KNOWLEDGE,
+    entreprise: {
+      ...(KNOWLEDGE.entreprise||{}),
+      nom:      document.getElementById("kNom").value,
+      type:     document.getElementById("kType").value,
+      telephone:document.getElementById("kTel").value,
+      email:    document.getElementById("kEmail").value,
+      ville:    (KNOWLEDGE.entreprise||{}).ville || "Gabon",
+      horaires: (KNOWLEDGE.entreprise||{}).horaires || "Lundi-Vendredi 8h-18h",
+    },
+    description: document.getElementById("kDesc").value,
+    services
+  };
+
+  try {
+    await fetch(`${API_BASE}/client/update`, {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        token: TOKEN,
+        assistant_name:  document.getElementById("aName").value,
+        assistant_color: document.getElementById("aColor").value,
+        welcome_msg:     document.getElementById("aWelcome").value,
+        company:         document.getElementById("kNom").value
+      })
+    });
+    await fetch(`${API_BASE}/client/knowledge`, {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({token: TOKEN, knowledge})
+    });
+    showToast("✅ Assistant mis à jour avec succès !");
+  } catch(e) { showToast("❌ Erreur lors de la sauvegarde"); }
+}
+
+// ── WIDGET CODE
+function generateWidgetCode() {
+  const code = `<!-- Nexora Chatbot Widget -->
+<script>
+(function(){
+  var cid = "${CLIENT_ID}";
+  var color = "${ME.assistant_color || '#00e5ff'}";
+  var name = "${ME.assistant_name || 'Assistant'}";
+  var welcome = "${ME.welcome_msg || 'Bonjour ! Comment puis-je vous aider ?'}";
+  var apiUrl = "${window.location.origin}";
+  
+  // Bulle
+  var btn = document.createElement("div");
+  btn.style.cssText = "position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:"+color+";border-radius:50%;cursor:pointer;z-index:9999;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:transform 0.2s";
+  btn.innerHTML = "✦";
+  btn.onmouseenter = function(){btn.style.transform="scale(1.1)"};
+  btn.onmouseleave = function(){btn.style.transform="scale(1)"};
+  document.body.appendChild(btn);
+  
+  // Fenêtre chat
+  var box = document.createElement("div");
+  box.style.cssText = "position:fixed;bottom:96px;right:24px;width:340px;height:480px;background:#111120;border:1px solid rgba(255,255,255,0.1);border-radius:16px;z-index:9999;display:none;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.5);font-family:sans-serif;overflow:hidden";
+  box.innerHTML = '<div style="padding:14px 18px;background:#16162a;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:10px"><div style="width:32px;height:32px;border-radius:50%;background:'+color+';display:flex;align-items:center;justify-content:center;color:#080810;font-weight:bold">✦</div><div><div style="font-size:13px;font-weight:600;color:#f0f0f8">'+name+'</div><div style="font-size:11px;color:rgba(240,240,248,0.5)">En ligne · Nexora</div></div></div><div id="nchat-msgs" style="flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:10px"><div style="background:#16162a;border-radius:10px;padding:10px 14px;font-size:13px;color:#f0f0f8;max-width:85%;line-height:1.5">'+welcome+'</div></div><div style="padding:12px;border-top:1px solid rgba(255,255,255,0.07);display:flex;gap:8px"><input id="nchat-input" placeholder="Votre message..." style="flex:1;background:#16162a;border:none;border-radius:8px;padding:9px 12px;color:#f0f0f8;font-size:13px;outline:none"><button id="nchat-send" style="background:'+color+';border:none;border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:16px">→</button></div>';
+  document.body.appendChild(box);
+  
+  var hist = [];
+  btn.onclick = function(){box.style.display = box.style.display==="none"?"flex":"none"};
+  
+  function sendMsg(){
+    var input = document.getElementById("nchat-input");
+    var txt = input.value.trim(); if(!txt) return;
+    addMsg(txt,"user"); input.value="";
+    fetch(apiUrl+"/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:txt,history:hist,client_id:cid})}).then(r=>r.json()).then(d=>{addMsg(d.reply||"Désolé, une erreur est survenue.","bot");}).catch(()=>addMsg("Connexion impossible.","bot"));
+  }
+  
+  function addMsg(txt,sender){
+    var msgs = document.getElementById("nchat-msgs");
+    var d = document.createElement("div");
+    d.style.cssText = "border-radius:10px;padding:10px 14px;font-size:13px;line-height:1.5;max-width:85%;"+(sender==="user"?"background:"+color+";color:#080810;align-self:flex-end":"background:#16162a;color:#f0f0f8");
+    d.textContent = txt; msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight;
+    if(sender==="user") hist.push({role:"user",content:txt});
+    else hist.push({role:"assistant",content:txt});
+  }
+  
+  document.getElementById("nchat-send").onclick = sendMsg;
+  document.getElementById("nchat-input").onkeydown = function(e){if(e.key==="Enter")sendMsg()};
+})();
+<\/script>
+<!-- Fin Nexora Widget -->`;
+  document.getElementById("widgetCode").textContent = code;
+}
+
+function copyCode() {
+  const code = document.getElementById("widgetCode").textContent;
+  navigator.clipboard.writeText(code).then(()=> showToast("✅ Code copié !"));
+}
+
+// ── EXPORT
+function exportLeads() {
+  showToast("Export en cours...");
+}
+
+// ── NAV
+function showPage(name, el) {
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
+  document.getElementById("page-"+name).classList.add("active");
+  if(el) el.classList.add("active");
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "/login";
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.style.display = "block";
+  setTimeout(()=>t.style.display="none", 3000);
+}
+
+init();
+</script>
+</body>
+</html>
