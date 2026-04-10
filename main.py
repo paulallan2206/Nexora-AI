@@ -7,11 +7,11 @@ from datetime import datetime
 app = FastAPI(title="Nexora API", version="4.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "")
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "en3CLbFqBTLfss7Tr5fn5WCCpxeDpXxw")
 MISTRAL_URL     = "https://api.mistral.ai/v1/chat/completions"
 MISTRAL_MODEL   = "mistral-tiny"
-SUPABASE_URL    = os.getenv("SUPABASE_URL", "")
-SUPABASE_KEY    = os.getenv("SUPABASE_KEY", "")
+SUPABASE_URL    = os.getenv("SUPABASE_URL", "https://wmhduwjkvbngmawzsgjb.supabase.co")
+SUPABASE_KEY    = os.getenv("SUPABASE_KEY", "https://wmhduwjkvbngmawzsgjb.supabase.co")
 ADMIN_PASSWORD  = os.getenv("ADMIN_PASSWORD", "nexora2025")
 
 # ── HELPERS
