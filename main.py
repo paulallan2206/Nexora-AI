@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+import re
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 import json, os, httpx, hashlib, secrets
@@ -10,9 +11,11 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY", "en3CLbFqBTLfss7Tr5fn5WCCpxeDpXxw")
 MISTRAL_URL     = "https://api.mistral.ai/v1/chat/completions"
 MISTRAL_MODEL   = "mistral-tiny"
-SUPABASE_URL    = os.getenv("SUPABASE_URL", "https://wmhduwjkvbngmawzsgjb.supabase.co")
-SUPABASE_KEY    = os.getenv("SUPABASE_KEY", "https://wmhduwjkvbngmawzsgjb.supabase.co")
+SUPABASE_URL    = os.getenv("SUPABASE_URL", "wmhduwjkvbngmawzsgjb.supabase.co")
+SUPABASE_KEY    = os.getenv("SUPABASE_KEY", "sb_publishable_k1P2HbAYmsuuQC7kkSj-Gg_CNPKDYQB")
 ADMIN_PASSWORD  = os.getenv("ADMIN_PASSWORD", "nexora2025")
+RESEND_API_KEY  = os.getenv("RESEND_API_KEY", "re_Xzxg2NJ1_3TDAj8rNvLEpWe8sX3YrQCFR") 
+FROM_EMAIL      = os.getenv("FROM_EMAIL", "noreply@nexora-ai.com")
 
 # ── HELPERS
 def hash_password(pwd: str) -> str:
@@ -67,7 +70,130 @@ async def db_update(table: str, filters: str, data: dict):
     except:
         return None
 
+# ── EMAIL SERVICE (Resend)
+async def send_email(to: str, subject: str, html: str):
+    """Envoie un email via Resend API (gratuit jusqu'à 3000/mois)."""
+    if not RESEND_API_KEY:
+        print(f"[EMAIL] Pas de clé Resend — email simulé vers {to}: {subject}")
+        return True
+    try:
+        async with httpx.AsyncClient(timeout=10) as c:
+            r = await c.post(
+                "https://api.resend.com/emails",
+                headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
+                json={"from": f"Nexora <{FROM_EMAIL}>", "to": [to], "subject": subject, "html": html}
+            )
+        return r.status_code in [200, 201]
+    except Exception as e:
+        print(f"[EMAIL ERROR] {e}")
+        return False
+
+def welcome_email_html(company: str, email: str, client_id: str) -> str:
+    return f"""
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#080810;font-family:'Segoe UI',sans-serif;">
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+
+    <div style="text-align:center;margin-bottom:40px;">
+      <h1 style="font-family:Georgia,serif;font-size:36px;font-weight:400;color:#f0f0f8;margin:0;">
+        Nexo<span style="color:#00e5ff;">ra</span>
+      </h1>
+    </div>
+
+    <div style="background:#111120;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:40px;">
+      <h2 style="font-family:Georgia,serif;font-size:24px;font-weight:300;color:#f0f0f8;margin:0 0 16px;">
+        Bienvenue chez Nexora, <span style="color:#00e5ff;">{company}</span> ! 🎉
+      </h2>
+      <p style="color:rgba(240,240,248,0.6);font-size:15px;line-height:1.7;margin:0 0 28px;">
+        Votre compte a été créé avec succès. Vous pouvez maintenant configurer votre assistant IA et le déployer sur votre site web en quelques minutes.
+      </p>
+
+      <div style="background:#16162a;border-radius:12px;padding:24px;margin-bottom:28px;">
+        <div style="font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(240,240,248,0.4);margin-bottom:16px;">Vos identifiants</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <span style="color:rgba(240,240,248,0.5);font-size:13px;">Email</span>
+          <span style="color:#f0f0f8;font-size:13px;font-weight:600;">{email}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:rgba(240,240,248,0.5);font-size:13px;">ID Client</span>
+          <span style="color:#00e5ff;font-size:13px;font-family:monospace;">{client_id}</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom:28px;">
+        <div style="font-size:13px;font-weight:600;color:#f0f0f8;margin-bottom:14px;">🚀 Prochaines étapes :</div>
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
+          <span style="background:#00e5ff;color:#080810;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">1</span>
+          <span style="color:rgba(240,240,248,0.7);font-size:13px;line-height:1.5;">Connectez-vous à votre dashboard et configurez votre assistant</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
+          <span style="background:#00e5ff;color:#080810;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">2</span>
+          <span style="color:rgba(240,240,248,0.7);font-size:13px;line-height:1.5;">Personnalisez le nom, les couleurs et le contenu de votre assistant</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <span style="background:#00e5ff;color:#080810;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">3</span>
+          <span style="color:rgba(240,240,248,0.7);font-size:13px;line-height:1.5;">Copiez le code widget et collez-le sur votre site web</span>
+        </div>
+      </div>
+
+      <a href="https://nexora-ai-btob.onrender.com/dashboard"
+         style="display:block;text-align:center;background:#00e5ff;color:#080810;
+         padding:16px 32px;border-radius:10px;font-weight:700;font-size:14px;
+         letter-spacing:1px;text-decoration:none;text-transform:uppercase;">
+        Accéder à mon dashboard →
+      </a>
+    </div>
+
+    <div style="text-align:center;margin-top:32px;">
+      <p style="color:rgba(240,240,248,0.3);font-size:12px;line-height:1.6;">
+        © 2025 Nexora · Conçu par Paul Allan Junior MEYE SIKA<br>
+        Libreville, Gabon
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>"""
+
+def lead_notification_html(company: str, lead_name: str, lead_email: str, lead_phone: str) -> str:
+    return f"""
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#080810;font-family:'Segoe UI',sans-serif;">
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <h1 style="font-family:Georgia,serif;font-size:28px;font-weight:400;color:#f0f0f8;margin:0;">
+        Nexo<span style="color:#00e5ff;">ra</span>
+      </h1>
+    </div>
+    <div style="background:#111120;border:1px solid rgba(0,229,255,0.2);border-radius:16px;padding:32px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+        <span style="font-size:28px;">🎯</span>
+        <h2 style="font-family:Georgia,serif;font-size:20px;font-weight:300;color:#f0f0f8;margin:0;">
+          Nouveau lead pour <span style="color:#00e5ff;">{company}</span> !
+        </h2>
+      </div>
+      <div style="background:#16162a;border-radius:10px;padding:20px;">
+        <div style="margin-bottom:10px;"><span style="color:rgba(240,240,248,0.5);font-size:12px;">Nom</span><br><span style="color:#f0f0f8;font-size:15px;font-weight:600;">{lead_name}</span></div>
+        <div style="margin-bottom:10px;"><span style="color:rgba(240,240,248,0.5);font-size:12px;">Email</span><br><span style="color:#00e5ff;font-size:14px;">{lead_email}</span></div>
+        <div><span style="color:rgba(240,240,248,0.5);font-size:12px;">Téléphone</span><br><span style="color:#f0f0f8;font-size:14px;">{lead_phone or "Non fourni"}</span></div>
+      </div>
+      <a href="https://nexora-ai-btob.onrender.com/dashboard"
+         style="display:block;text-align:center;background:#00e5ff;color:#080810;
+         padding:13px;border-radius:8px;font-weight:700;font-size:13px;
+         text-decoration:none;margin-top:20px;text-transform:uppercase;letter-spacing:1px;">
+        Voir dans mon dashboard →
+      </a>
+    </div>
+  </div>
+</body>
+</html>"""
+
 # ── KNOWLEDGE BASE
+
 def load_knowledge(client_id: str = None):
     if client_id:
         path = f"knowledge_{client_id}.json"
@@ -162,6 +288,13 @@ async def register(req: Request):
     }
     with open(f"knowledge_{client_id}.json", "w", encoding="utf-8") as f:
         json.dump(default_kb, f, ensure_ascii=False, indent=2)
+
+    # Envoie email de bienvenue
+    await send_email(
+        to=email,
+        subject=f"Bienvenue chez Nexora, {company} ! 🎉",
+        html=welcome_email_html(company, email, client_id)
+    )
 
     return {"status": "success", "token": token, "client_id": client_id, "company": company}
 
