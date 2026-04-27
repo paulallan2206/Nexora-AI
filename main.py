@@ -221,7 +221,7 @@ Redirige vers {e['telephone']} si tu ne sais pas. Date: {datetime.now().strftime
 _clients, _leads, _convs, _subs, _sessions = [], [], [], [], {}
 
 # ── PAGES
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def root(): return FileResponse("index.html")
 @app.get("/admin")
 def admin(): return FileResponse("admin.html")
